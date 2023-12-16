@@ -1,0 +1,33 @@
+
+#configure server port
+server:
+  port: 8484
+
+#aplication props
+spring:
+  application:
+    name: qr-code-generator-poc
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,beans
+  info:
+    env:
+      enabled: true
+  endpoint:
+    health:
+      show-details: ALWAYS
+
+info:
+  application:
+    name: ${spring.application.name}
+    description: QR Code generator POC
+    version: '@project.version@'
+
+#configure my props
+#coach:
+#  name: Mickey Mouse
+#team:
+#  name: The Mouse Crew
