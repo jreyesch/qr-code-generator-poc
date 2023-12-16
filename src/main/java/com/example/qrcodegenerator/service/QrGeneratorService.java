@@ -1,12 +1,72 @@
 package com.example.qrcodegenerator.service;
 
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.MultiFormatWriter;
+import com.google.zxing.WriterException;
+import com.google.zxing.client.j2se.MatrixToImageWriter;
+import com.google.zxing.common.BitMatrix;
+import io.micrometer.common.util.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import java.io.File;
+import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 @Service
 public class QrGeneratorService implements QrGeneratorInterface{
+
+    @Value("${qrcode.output.directory}")
+    private String outputLocation;
+    private static final String charset = "UTF-8";
+    private static final String strDateFormat = "yyyyMMddhhmmss";
+    @Value("${qrcode.message}")
+    private String qrCodeMessage;
+
+
+
     @Override
-    public String generateFromText(String text) {
-        System.out.println("QR GENERATED: " + text);
+    public String generateFromText(String message) {
+        System.out.println("QR GENERATED: " + message);
+
+        System.out.println("### Generating QRCode ###");
+        System.out.println("Output directory - " + outputLocation);
+
+        try {
+            String finalMessage = (StringUtils.isBlank(message))?qrCodeMessage:message;
+            System.out.println("Final Input Message - " + finalMessage);
+            processQRcode(finalMessage, prepareOutputFileName(), charset, 400, 400);
+
+        } catch (WriterException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return "DONE FROM SERVICE";
+    }
+
+    public void generateQRCode(String message) {
+
+    }
+    private String prepareOutputFileName() {
+        Date date = new Date();
+
+        DateFormat dateFormat = new SimpleDateFormat(strDateFormat);
+        String formattedDate= dateFormat.format(date);
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(outputLocation).append("/").append("QRCode-").append(formattedDate).append(".png");
+        System.out.println("Final output file - "+sb.toString());
+        return sb.toString();
+    }
+
+    private void processQRcode(String data, String path, String charset, int height, int width) throws WriterException, IOException {
+        /*the BitMatrix class represents the 2D matrix of bits*/
+       /* MultiFormatWriter is a factory class that finds the appropriate Writer subclass for
+        the BarcodeFormat requested and encodes the barcode with the supplied contents.*/
+        BitMatrix matrix = new MultiFormatWriter().encode(new String(data.getBytes(charset), charset), BarcodeFormat.QR_CODE, width, height);
+        MatrixToImageWriter.writeToFile(matrix, path.substring(path.lastIndexOf('.') + 1), new File(path));
     }
 }

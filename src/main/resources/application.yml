@@ -27,7 +27,7 @@ info:
     version: '@project.version@'
 
 #configure my props
-#coach:
-#  name: Mickey Mouse
-#team:
-#  name: The Mouse Crew
+qr-code:
+  output:
+    directory: "output/codes"
+  message: "Default Message"
